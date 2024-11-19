@@ -92,10 +92,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(int id) {
         User user = repo.findById(id).orElseThrow(()-> new ResourceNotFoundException("User not found"));
-        List<Product> products = productRepo.findByUser(user);
-        products.forEach(p->p.setUser(null));
-        productRepo.saveAll(products);
-        user.getProducts().clear();
+//        List<Product> products = productRepo.findByUser(user);
+//        products.forEach(p->{
+////            p.setUser(null);
+//            productRepo.deleteByIdAndUser(p.getId(),user);
+//        });
+//        productRepo.saveAll(products);
+//        user.getProducts().clear();
         RefreshToken refreshToken=refreshTokenRepository.findByUserId(id).orElseThrow(()->
                 new ResourceNotFoundException("refresh token not found")
         );

@@ -60,20 +60,22 @@ public class UserController {
         return new ResponseEntity<>("user deleted",HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/login")
+    // User login and refresh token endpoints
+
+    @PostMapping("/auth/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request){
         AuthenticationResponse token = userService.verify(request);
         return ResponseEntity.ok(token);
     }
 
 
-    @PostMapping("/refresh")
+    @PostMapping("/auth/refresh")
     public ResponseEntity<String> refresh(@RequestHeader("Authorization") String refreshToken) {
         String accessToken = userService.refresh(refreshToken);
         return  ResponseEntity.ok(accessToken);
     }
 
-    @PostMapping("/refreshUsingId")
+    @PostMapping("/auth/refreshUsingId")
     public ResponseEntity<String> refreshUsingId(@RequestHeader("Id") int id) {
 
         String accessToken = userService.refreshUsingId(id);

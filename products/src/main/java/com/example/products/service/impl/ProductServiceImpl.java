@@ -30,7 +30,8 @@ public class ProductServiceImpl implements ProductService {
     JwtService jwtService;
 
     @Override
-    public ProductDto createProduct(String token, ProductDto productDto) {
+    public ProductDto createProduct(String authorizationHeader, ProductDto productDto) {
+        String token = convertToToken(authorizationHeader);
         String username = jwtService.extractUsername(token);
         User user = userRepo.findByUsername(username)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
@@ -43,7 +44,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDto getProduct(String token,int id) {
+    public ProductDto getProduct(String authorizationHeader,int id) {
+        String token = convertToToken(authorizationHeader);
         String username = jwtService.extractUsername(token);
         User user = userRepo.findByUsername(username)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
@@ -53,17 +55,16 @@ public class ProductServiceImpl implements ProductService {
         ProductDto productDto;
         if(user.getId() == product.getUser().getId())
              productDto = productMapper.mapToProductDto(product);
-        else {
-            productDto = null;
+        else
             throw new ProductNotAcessibleException("cannot access this product");
 
-        }
 
         return productDto;
     }
 
     @Override
-    public List<ProductDto> getAllProductsOFUser(String token) {
+    public List<ProductDto> getAllProductsOFUser(String authorizationHeader) {
+        String token = convertToToken(authorizationHeader);
         String username = jwtService.extractUsername(token);
         User user = userRepo.findByUsername(username)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
@@ -72,7 +73,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDto updateProduct(String token, int id, ProductDto productDto) {
+    public ProductDto updateProduct(String authorizationHeader, int id, ProductDto productDto) {
+        String token = convertToToken(authorizationHeader);
         String username = jwtService.extractUsername(token);
         User user = userRepo.findByUsername(username)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
@@ -87,7 +89,6 @@ public class ProductServiceImpl implements ProductService {
             updated = productMapper.mapToProductDto(product);
         }
         else {
-            updated =   null;
             throw new ProductNotAcessibleException("cannot access this product");
         }
 
@@ -95,13 +96,34 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDto patchProduct(int id, ProductDto productDto) {
-        return null;
+    public ProductDto patchProduct(String authorizationHeader,int id, ProductDto productDto) {
+        String token = convertToToken(authorizationHeader);
+        String username = jwtService.extractUsername(token);
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(()->new ResourceNotFoundException("User not found"));
+        Product product = productRepo.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("Product not found"));
+
+        ProductDto patched;
+        if(user.getId() == product.getUser().getId()) {
+            if(productDto.getPrice() != 0)
+                product.setPrice(productDto.getPrice());
+            if (productDto.getName() != null)
+                product.setName(productDto.getName());
+            productRepo.save(product);
+            patched = productMapper.mapToProductDto(product);
+        }
+        else {
+            throw new ProductNotAcessibleException("cannot access this product");
+        }
+
+        return patched;
     }
 
     @Transactional
     @Override
-    public void deleteProduct(String token, int id) {
+    public void deleteProduct(String authorizationHeader, int id) {
+        String token = convertToToken(authorizationHeader);
         String username = jwtService.extractUsername(token);
         User user = userRepo.findByUsername(username)
                 .orElseThrow(()->new ResourceNotFoundException("User not found"));
@@ -113,5 +135,12 @@ public class ProductServiceImpl implements ProductService {
         else {
             throw new ProductNotAcessibleException("cannot access this product");
         }
+    }
+
+
+
+    public String convertToToken(String authorizationHeader){
+        return authorizationHeader.startsWith("Bearer ") ?
+                authorizationHeader.substring(7) : authorizationHeader;
     }
 }

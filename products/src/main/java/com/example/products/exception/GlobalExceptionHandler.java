@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> UsernameNotUniqueHandler(UsernameNotUniqueException ex) {
         String message = ex.getMessage();
         ApiResponse apiResponse = new ApiResponse(message, false);
-        return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
 

@@ -14,7 +14,7 @@ public interface ProductService {
 
     ProductDto updateProduct(String token,int id,ProductDto productDto);
 
-    ProductDto patchProduct(int id,ProductDto productDto);
+    ProductDto patchProduct(String authorizationHeader,int id,ProductDto productDto);
 
     void deleteProduct(String token,int id);
 }

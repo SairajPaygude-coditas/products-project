@@ -27,8 +27,8 @@ public class SecurityConfig {
         return http
                 .csrf(c->c.disable())
                 .authorizeHttpRequests(req-> {
-                    req.requestMatchers("/api/users/**").permitAll();
-                            req.requestMatchers("/api/products/**").permitAll()
+                    req.requestMatchers("/api/users/auth/**").permitAll()
+                            .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
                             .anyRequest()
                             .authenticated();
                 })
